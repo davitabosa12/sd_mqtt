@@ -1,3 +1,6 @@
+import sys
+
+sys.path.append(".")
 from boiler import BoilerEventGenerator
 import time
 import asyncio
