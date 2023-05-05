@@ -4,4 +4,4 @@ from model.cat_alert import CATAlert, CATAlertType
 
 class CATAlertSchema(Schema):
     timestamp = fields.DateTime()
-    alert_type: fields.Enum(CATAlertType)
+    alert_type = fields.Enum(CATAlertType)
