@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 import math
 import paho.mqtt.client as mqtt
+import config
 from model.schema.temperature_message import (
     TemperatureMessage,
     TemperatureMessageSchema,
@@ -29,7 +30,7 @@ class BoilerEventGenerator:
         self.boiler = Boiler()
         self.task = None
         self.client = mqtt.Client()
-        self.client.connect("192.168.18.118", 1883, 60)
+        self.client.connect(config.MQTT_BROKER, 1883, 60)
 
     async def start_boiler(self):
         await self._boiler_coroutine()

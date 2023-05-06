@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 import paho.mqtt.client as mqtt
 from calcs.CAT import CAT
+import config
 from model.schema.temperature_message import (
     TemperatureMessageSchema,
     TemperatureMessage,
@@ -68,7 +69,7 @@ cat.on_sudden_temperature_raise = on_sudden_temperature_raise
 # manual interface.
 def start_client():
     logger.info("Starting MQTT Client")
-    _client.connect("192.168.18.118", 1883, 60)
+    _client.connect(config.MQTT_BROKER, config.PORT, 60)
     _client.loop_start()
     cat.start_cat(cat_event_loop)
 

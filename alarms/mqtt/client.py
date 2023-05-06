@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 import logging
 import paho.mqtt.client as mqtt
+import config
 from model.schema.temperature_message import (
     TemperatureMessageSchema,
     TemperatureMessage,
@@ -45,7 +46,7 @@ _client.on_message = on_message
 # Other loop*() functions are available that give a threaded interface and a
 # manual interface.
 def start_client():
-    _client.connect("192.168.18.118", 1883, 60)
+    _client.connect(config.MQTT_BROKER, 1883, 60)
     _client.loop_start()
 
 
