@@ -15,13 +15,15 @@ TIMESCALE = 0.016
 class Boiler:
     def __init__(self):
         self._temperature = 150
+        self._2nd_osc = 0
         self.i = 0
 
     @property
     def temperature(self):
-        self._temperature += 70 * math.sin(self.i)
+        self._2nd_osc += 8 * math.sin(self.i / 10)
+        self._temperature += 50 * math.sin(self.i)
         self.i += 1
-        return self._temperature
+        return self._temperature + self._2nd_osc
 
 
 class BoilerEventGenerator:

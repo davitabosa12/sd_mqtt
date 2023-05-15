@@ -12,6 +12,7 @@ class CAT:
         self.temp_buffer: List[TemperatureMessage] = []
         self.on_high_temperature: Callable = None
         self.on_sudden_temperature_raise: Callable = None
+        self.last_mean_temps = None
         self.lock = lock
 
     async def register_temperature(self, temperature: TemperatureMessage):
@@ -44,13 +45,13 @@ class CAT:
                             if callable(self.on_high_temperature):
                                 self.on_high_temperature()
 
-                    last_temps_delta = (
-                        self.temp_buffer[-1].temperature
-                        - self.temp_buffer[-2].temperature
-                    )
-                    if last_temps_delta > 5:
-                        if callable(self.on_sudden_temperature_raise):
-                            self.on_sudden_temperature_raise()
+                        if not self.last_mean_temps:
+                            self.last_mean_temps = mean_temps
+                        last_temps_delta = mean_temps - self.last_mean_temps
+                        if last_temps_delta > 5:
+                            if callable(self.on_sudden_temperature_raise):
+                                self.on_sudden_temperature_raise()
+                        self.last_mean_temps = mean_temps
 
     def print_cat_report(self, temps, cutoff_timestamp, latest_timestamp):
         print("********* CAT REPORT **********")

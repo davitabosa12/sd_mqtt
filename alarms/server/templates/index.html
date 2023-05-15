@@ -12,27 +12,40 @@
 
 <body>
     <h1>Boiler Alert System</h1>
-    <p>Plot:</p>
-    <div id="sse-output"></div>
+    <h3>Plot</h3>
     <div id="plotly-div"></div>
+    <h3>Alerts</h3>
+    <div style="width: 500px; height: 600px; overflow:auto;">
+        <table cellspacing="0" cellpadding="1" border="1" width="100%">
+            <thead>
+                <tr>
+                    <th>Alert Type</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody id="sse-output">
+            </tbody>
+        </table>
+    </div>
 </body>
 <script>
-    var trace1 = {
-        x: [1, 2, 3, 4],
-        y: [10, 15, 13, 17],
-        type: 'scatter'
-    };
+    let temps = [];
+    let times = [];
+    let previousAlerts = [];
+    function createTableEntry(data) {
+        const row = document.createElement("tr");
+        const alertTypeCell = document.createElement("td");
+        const timeCell = document.createElement("td");
+        alertTypeCell.textContent = data.alert_type;
+        timeCell.textContent = new Date(data.timestamp).toLocaleString();
+        row.appendChild(alertTypeCell);
+        row.appendChild(timeCell);
+        return row;
 
-    var trace2 = {
-        x: [1, 2, 3, 4],
-        y: [16, 5, 11, 9],
-        type: 'scatter'
-    };
-
-    var data = [trace1, trace2];
-
-    Plotly.newPlot('plotly-div', data);
+    }
+    //Plotly.newPlot('plotly-div', data);
 </script>
+
 <script>
     const sseElement = document.querySelector("#sse-output")
     const evtSource = new EventSource("http://localhost:3456/alerts");
@@ -40,9 +53,31 @@
 
         const newElement = document.createElement("p");
         const eventList = document.getElementById("sse-output");
+        const data = JSON.parse(event.data);
+        previousAlerts = [data, ...previousAlerts];
+        eventList.textContent = "";
+        previousAlerts.forEach((elem) => {
+            eventList.appendChild(createTableEntry(elem));
+        });
+    });
+    const tempSource = new EventSource("http://localhost:3456/temps");
+    function limitArray(arr, limit) {
+        return arr.slice(-limit);
+    }
+    tempSource.addEventListener("temp", (event) => {
+        const graphDiv = document.querySelector('#plotly-div');
+        const { timestamp, temperature } = JSON.parse(event.data);
+        temps.push(temperature);
+        times.push(timestamp);
+        temps = limitArray(temps, 100);
+        times = limitArray(times, 100);
+        const trace = {
+            x: times,
+            y: temps,
+            type: 'scatter'
+        }
+        Plotly.newPlot('plotly-div', [trace]);
 
-        newElement.textContent = `message: ${event.data}`;
-        eventList.appendChild(newElement);
 
     });
 </script>

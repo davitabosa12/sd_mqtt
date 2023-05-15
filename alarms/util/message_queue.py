@@ -23,3 +23,4 @@ class MessageQueue:
 
 
 message_queue = MessageQueue()
+temps_message_queue = MessageQueue()

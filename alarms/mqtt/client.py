@@ -8,11 +8,15 @@ from model.schema.temperature_message import (
     TemperatureMessage,
 )
 from model.schema.cat_alert import CATAlert, CATAlertSchema, CATAlertType
-from alarms.util.message_queue import message_queue
+from alarms.util.message_queue import message_queue, temps_message_queue
 
 
 def handle_alerts(alert: CATAlert):
     message_queue.publish(alert)
+
+
+def handle_temps(temp: TemperatureMessage):
+    temps_message_queue.publish(temp)
 
 
 # The callback for when the client receives a CONNACK response from the server.
@@ -21,7 +25,7 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    # client.subscribe("boiler")
+    client.subscribe("boiler")
     client.subscribe("boiler/cat")
 
 
@@ -30,6 +34,7 @@ def on_message(client, userdata, msg):
     msg_str = msg.payload.decode()
     if msg.topic == "boiler":
         temp: TemperatureMessage = TemperatureMessageSchema().loads(msg_str)
+        handle_temps(temp)
     elif msg.topic == "boiler/cat":
         alert: CATAlert = CATAlertSchema().loads(msg_str)
         handle_alerts(alert)
